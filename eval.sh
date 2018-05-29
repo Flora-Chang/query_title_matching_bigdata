@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=3 python3 eval.py --test_data_flag click --flag lixiang --pairwise True --predict_dir "../predict/lixiang_test.csv" --save_dir "../models/lixiang_lr0.001_bz64_filter64-best/" --click_training_set "../data/lixiang_law/train.txt" --click_train_set "../data/lixiang_law/train.test.txt" --click_dev_set "../data/lixiang_law/test.txt"
