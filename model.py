@@ -29,15 +29,15 @@ class Model(object):
 
     def _input_layer(self):
         with tf.variable_scope('Train_Inputs'):
-            self.train_query = tf.placeholder(dtype=tf.int32, shape=(None, self.MAX_QUERY_WORD_SIZE), name='query')
-            self.train_title = tf.placeholder(dtype=tf.int32, shape=(None, self.MAX_TITLE_WORD_SIZE), name='title')
+            self.train_query = tf.placeholder(dtype=tf.int64, shape=(None, self.MAX_QUERY_WORD_SIZE), name='query')
+            self.train_title = tf.placeholder(dtype=tf.int64, shape=(None, self.MAX_TITLE_WORD_SIZE), name='title')
             self.train_labels = tf.placeholder(dtype=tf.int32, shape=(None, ), name='labels')
 
         with tf.variable_scope('Predict_Inputs'):
-            self.predict_query = tf.placeholder(dtype=tf.int32, shape=(None, self.MAX_QUERY_WORD_SIZE), name='query')
-            self.predict_title = tf.placeholder(dtype=tf.int32, shape=(None, self.MAX_TITLE_WORD_SIZE), name='title')
+            self.predict_query = tf.placeholder(dtype=tf.int64, shape=(None, self.MAX_QUERY_WORD_SIZE), name='query')
+            self.predict_title = tf.placeholder(dtype=tf.int64, shape=(None, self.MAX_TITLE_WORD_SIZE), name='title')
             self.predict_labels = tf.placeholder(dtype=tf.int32, shape=(None,), name='labels')
-            self.title_num = tf.placeholder(dtype=tf.int32, shape=(1,),  name='title_num')
+            self.title_num = tf.placeholder(dtype=tf.int64, shape=(1,),  name='title_num')
 
     def _embed_layer(self, query, title):
         with tf.variable_scope('Embedding_layer'), tf.device("/cpu:0"):

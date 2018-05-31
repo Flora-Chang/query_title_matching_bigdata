@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=2 python3 train.py --validation_steps 5000 --flag multi_gpu --pairwise True --margin 0.5  --tf_record_path "/search/ffz/projects/bigdata_qt_match/data/tf_record/" --click_dev_set "/search/ffz/projects/bigdata_qt_match/data/dev.txt" --click_train_set "/search/ffz/projects/bigdata_qt_match/data/train.txt"

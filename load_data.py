@@ -2,6 +2,7 @@
 import numpy as np
 import json
 from util import FLAGS
+import tensorflow as tf
 
 def strQ2B(ustring):
     '''全转半'''
@@ -23,6 +24,15 @@ def get_vocab_dict(input_file=FLAGS.vocab_path):
             words_dict[word.strip()] = cnt
             cnt += 1
     return words_dict
+
+def get_id2word(input_file=FLAGS.vocab_path):
+    id2word = [0 for i in range(4200001)]
+    cnt = 0
+    with open(input_file) as f:
+        for word in f:
+            id2word[cnt] = word
+            cnt += 1
+    return id2word
 
 def termid_to_id(input_file=FLAGS.termid_path):
     termid_dict = {}
@@ -54,7 +64,7 @@ def batch(inputs, threshold_length):
         max_sequence_length = min(max_sequence_length, threshold_length)
     '''
     max_sequence_length = threshold_length
-    inputs_batch_major = np.zeros(shape=[batch_size, max_sequence_length], dtype=np.int32)  # == PAD
+    inputs_batch_major = np.zeros(shape=[batch_size, max_sequence_length], dtype=np.int64)  # == PAD
     for i, seq in enumerate(inputs):
         for j, element in enumerate(seq):
             if j >= threshold_length:
@@ -273,9 +283,42 @@ class LoadClickData(object):
             neg_titles = batch(neg_titles, self.title_len_threshold)
             for i, j in zip(pos_titles, neg_titles):
                 titles.append([i, j])
-            titles = np.array(titles, dtype=int).reshape([-1, self.title_len_threshold])
+            titles = np.array(titles, dtype=np.int64).reshape([-1, self.title_len_threshold])
 
             yield queries, titles, labels, ranks
 
         print("self.cnt:", self.cnt)
 
+class LoadTfRecord(object):
+    def __init__(self):
+        pass
+
+    def load_tfrecord(self, tfrecord_paths):
+        # Even when reading in multiple threads, share the filename queue.
+        Qlen = 20
+        Alen = 20
+        filename_queue = tf.train.string_input_producer(tfrecord_paths)
+        reader = tf.TFRecordReader()
+        _, serialized_example = reader.read(filename_queue)  # 返回文件名和文件
+        features = tf.parse_single_example(serialized_example,
+                                           features={
+                                               'query': tf.FixedLenFeature(Qlen, tf.int64),
+                                               'pos_title': tf.FixedLenFeature(Alen, tf.int64),
+                                               'neg_title': tf.FixedLenFeature(Alen, tf.int64),
+                                           })
+        query = features['query']
+        pos_title = features['pos_title']
+        neg_title = features['neg_title']
+        print(query)
+        print(pos_title)
+        print(neg_title)
+
+        query_, pos_title_, neg_title_ = tf.train.shuffle_batch(
+            [query, pos_title, neg_title],
+            batch_size=128,
+            capacity=10000,
+            num_threads=5,
+            enqueue_many=False,
+            min_after_dequeue=5000)
+
+        return  query_, pos_title_, neg_title_
